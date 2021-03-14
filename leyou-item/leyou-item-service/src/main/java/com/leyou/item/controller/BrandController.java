@@ -4,12 +4,12 @@ import com.leyou.common.pojo.PageResult;
 import com.leyou.item.pojo.Brand;
 import com.leyou.item.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Date:2021/03_1:44 下午
@@ -22,6 +22,7 @@ public class BrandController {
     @Autowired
     private BrandService brandService;
 
+    //查询所有brand（接收参数，返回ResultPage对象）
     @GetMapping("page")
     public ResponseEntity<PageResult<Brand>> queryBrandsByPage(
             @RequestParam(value = "key", required = false)String key,         //搜索框
@@ -36,6 +37,13 @@ public class BrandController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(result);
+    }
+
+    //添加brand（接收json串，无返回值）
+    @PostMapping
+    public ResponseEntity<Void> saveBrand(Brand brand, @RequestParam("cids") List<Long> cids){  //接收的cid是分类、其余参数封装成brand
+        this.brandService.saveBrand(brand,cids);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 }
