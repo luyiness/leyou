@@ -9,13 +9,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Date:2021/03_2:40 下午
  * @Description：
  */
-@Controller
+@RestController
 @RequestMapping("upload")
 public class UploadController {
 
@@ -23,7 +24,7 @@ public class UploadController {
     private UploadService uploadService;
 
     @PostMapping("image")
-    public ResponseEntity<String> uploadImage(@RequestParam("file")MultipartFile file){
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file){
         String url = this.uploadService.upload(file);
         if (StringUtils.isBlank(url)) {
             return ResponseEntity.badRequest().build();

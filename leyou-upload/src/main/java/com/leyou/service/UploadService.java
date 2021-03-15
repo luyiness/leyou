@@ -1,5 +1,6 @@
 package com.leyou.service;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Date:2021/03_2:41 下午
@@ -43,8 +45,12 @@ public class UploadService {
             }
 
             // 保存到服务器
-            file.transferTo(new File("image" + originalFilename));
-
+            file.transferTo(new File("/Users/luyi/IdeaProjects/leyou/image/" + originalFilename));
+//            File dir = new File("image");
+//            if (!dir.exists()){
+//                dir.mkdirs();
+//            }
+//            file.transferTo(new File(dir,"originalFilename"));
             // 生成url地址，返回
             return "http://image.leyou.com/" + originalFilename;
         } catch (IOException e) {
