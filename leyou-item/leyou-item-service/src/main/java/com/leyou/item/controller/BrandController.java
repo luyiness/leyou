@@ -22,6 +22,15 @@ public class BrandController {
     @Autowired
     private BrandService brandService;
 
+    @GetMapping("cid/{cid}")
+    public ResponseEntity<List<Brand>> queryBrandsByCid(@PathVariable("cid")Long cid){
+        List<Brand> brands = this.brandService.queryBrandsByCid(cid);
+        if (CollectionUtils.isEmpty(brands)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(brands);
+    }
+
     //查询所有brand（接收参数，返回ResultPage对象）
     @GetMapping("page")
     public ResponseEntity<PageResult<Brand>> queryBrandsByPage(

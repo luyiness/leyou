@@ -26,6 +26,11 @@ public class BrandService {
     @Autowired
     private BrandMapper brandMapper;
 
+    public List<Brand> queryBrandsByCid(Long cid) {
+
+        return this.brandMapper.selectBrandByCid(cid);
+    }
+
     public PageResult<Brand> queryBrandsByPage(String key,Integer page,Integer rows,String sortBy,Boolean desc){
         Example example = new Example(Brand.class);
         Example.Criteria criteria = example.createCriteria();
