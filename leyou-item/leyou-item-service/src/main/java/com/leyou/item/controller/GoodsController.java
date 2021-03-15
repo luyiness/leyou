@@ -20,6 +20,12 @@ public class GoodsController {
     @Autowired
     private GoodsService goodsService;
 
+    @PostMapping("goods")
+    public ResponseEntity<Void> saveGoods(@RequestBody SpuBo spuBo){    //通过@RequestBody注解来接收Json请求
+        this.goodsService.saveGoods(spuBo);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
     @GetMapping("spu/page")
     public ResponseEntity<PageResult<SpuBo>> querySpuBoByPage(
             @RequestParam(value = "key", required = false)String key,
