@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.bo.SpuBo;
 import com.leyou.item.mapper.*;
+import com.leyou.item.pojo.Sku;
 import com.leyou.item.pojo.Spu;
 import com.leyou.item.pojo.SpuDetail;
 import com.leyou.item.pojo.Stock;
@@ -13,12 +14,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Date:2021/03_9:52 下午
@@ -44,6 +47,56 @@ public class GoodsService {
 
     @Autowired
     private StockMapper stockMapper;
+
+    @Transactional
+    public void updateGoods(SpuBo spuBo) {
+        Sku record = new Sku();
+        record.setSpuId(spuBo.getId());
+        List<Sku> skus = this.skuMapper.select(record);
+        skus.forEach(sku -> {
+            this.stockMapper.deleteByPrimaryKey(sku.getId());   //删除stock
+        });
+
+        Sku sku = new Sku();
+        sku.setSpuId(spuBo.getId());
+        this.skuMapper.delete(sku);     //删除sku
+
+        // 新增sku和库存
+        this.saveSkuAndStock(spuBo);
+
+        // 更新spu
+        spuBo.setLastUpdateTime(new Date());
+        spuBo.setCreateTime(null);
+        spuBo.setValid(null);
+        spuBo.setSaleable(null);
+        this.spuMapper.updateByPrimaryKeySelective(spuBo);
+
+        // 更新spu详情
+        this.spuDetailMapper.updateByPrimaryKeySelective(spuBo.getSpuDetail());
+    }
+
+
+    /**
+     * 根据spuId查询spuDetail
+     */
+    public SpuDetail querySpuDetailBySpuId(Long spuId) {
+
+        return this.spuDetailMapper.selectByPrimaryKey(spuId);
+    }
+
+    /**
+     * 根据spuId查询sku的集合
+     */
+    public List<Sku> querySkusBySpuId(Long spuId) {
+        Sku sku = new Sku();
+        sku.setSpuId(spuId);        //根据spuId查询
+        List<Sku> skus = this.skuMapper.select(sku);
+        skus.forEach(s -> {
+            Stock stock = this.stockMapper.selectByPrimaryKey(s.getId());      //再在spus中传入库存信息
+            s.setStock(stock.getStock());
+        });
+        return skus;
+    }
 
     @Transactional
     public void saveGoods(SpuBo spuBo) {
