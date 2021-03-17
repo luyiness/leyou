@@ -58,12 +58,12 @@ public class GoodsController {
     }
 
     @GetMapping("spu/page")
-    public ResponseEntity<PageResult<SpuBo>> querySpuBoByPage(
+    public ResponseEntity<PageResult<SpuBo>> querySpuByPage(
             @RequestParam(value = "key", required = false)String key,
             @RequestParam(value = "saleable", required = false)Boolean saleable,
             @RequestParam(value = "page", defaultValue = "1")Integer page,
-            @RequestParam(value = "rows", defaultValue = "5")Integer rows
-    ){
+            @RequestParam(value = "rows", defaultValue = "5")Integer rows)
+    {
         PageResult<SpuBo> pageResult = this.goodsService.querySpuBoByPage(key, saleable, page, rows);
         if(CollectionUtils.isEmpty(pageResult.getItems())){
             return ResponseEntity.notFound().build();

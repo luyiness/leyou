@@ -22,6 +22,15 @@ public class BrandController {
     @Autowired
     private BrandService brandService;
 
+    @GetMapping("{id}")
+    public ResponseEntity<Brand> queryBrandById(@PathVariable("id")Long id){
+        Brand brand = this.brandService.queryBrandByCid(id);
+        if (brand == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(brand);
+    }
+
     @GetMapping("cid/{cid}")
     public ResponseEntity<List<Brand>> queryBrandsByCid(@PathVariable("cid")Long cid){
         List<Brand> brands = this.brandService.queryBrandsByCid(cid);

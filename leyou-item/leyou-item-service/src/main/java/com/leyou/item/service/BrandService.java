@@ -59,4 +59,8 @@ public class BrandService {
             this.brandMapper.insertBrandAndCategory(cid, brand.getId());    //插入cid和bid 到category表
         });
     }
+
+    public Brand queryBrandByCid(Long id) {
+        return this.brandMapper.selectByPrimaryKey(id);
+    }
 }
