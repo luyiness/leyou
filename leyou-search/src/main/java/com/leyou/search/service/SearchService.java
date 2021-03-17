@@ -2,14 +2,23 @@ package com.leyou.search.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leyou.common.pojo.PageResult;
 import com.leyou.item.pojo.*;
 import com.leyou.search.client.BrandClient;
 import com.leyou.search.client.CategoryClient;
 import com.leyou.search.client.GoodsClient;
 import com.leyou.search.client.SpecificationClient;
+import com.leyou.search.pojo.SearchRequest;
+import com.leyou.search.repository.GoodsRepository;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,6 +44,40 @@ public class SearchService {
     private SpecificationClient specificationClient;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @Autowired
+    private GoodsRepository goodsRepository;
+
+    public PageResult<com.leyou.pojo.Goods> search(SearchRequest request) {
+        String key = request.getKey();
+        // 判断是否有搜索条件，如果没有，直接返回null。
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+
+        // 构建查询条件
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+
+        // 1、对key进行全文检索查询
+        queryBuilder.withQuery(QueryBuilders.matchQuery("all", key).operator(Operator.AND));       //根据key在all字段中查，（比如all="手机 小米 米11" 要AND查询）
+
+        // 2、通过sourceFilter设置返回的结果字段,我们只需要id、skus、subTitle
+        queryBuilder.withSourceFilter(new FetchSourceFilter(
+                new String[]{"id","skus","subTitle"}, null));
+
+        // 3、分页
+        // 准备分页参数
+        int page = request.getPage();
+        int size = request.getSize();
+        queryBuilder.withPageable(PageRequest.of(page - 1, size));
+
+        // 4、查询，获取结果
+        Page<com.leyou.pojo.Goods> goodsPage = this.goodsRepository.search(queryBuilder.build());
+
+        // 封装结果并返回
+        return new PageResult<>(goodsPage.getTotalElements(), goodsPage.getTotalPages(), goodsPage.getContent());
+    }
+
 
     public com.leyou.pojo.Goods buildGoods(Spu spu) throws IOException {
 
