@@ -120,7 +120,7 @@
 						<!--默认第一个预览-->
 						<div id="preview" class="spec-preview">
 							<span class="jqzoom">
-								<img jqimg="/img/_/b1.png" src="/img/_/s1.png" width="400px" height="400px"/>
+								<img :jqimg="images[0]" :src="images[0]" width="400px" height="400px"/>
 							</span>
 						</div>
 						<!--下方的缩略图-->
@@ -129,15 +129,8 @@
 							<!--左右按钮-->
 							<div class="items">
 								<ul>
-									<li><img src="/img/_/s1.png" bimg="/img/_/b1.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s2.png" bimg="/img/_/b2.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s3.png" bimg="/img/_/b3.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s1.png" bimg="/img/_/b1.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s2.png" bimg="/img/_/b2.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s3.png" bimg="/img/_/b3.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s1.png" bimg="/img/_/b1.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s2.png" bimg="/img/_/b2.png" onmousemove="preview(this)" /></li>
-									<li><img src="/img/_/s3.png" bimg="/img/_/b3.png" onmousemove="preview(this)" /></li>
+									<li v-for="(image,index) in images" :key="index">
+										<img :src="image" :bimg="image" onmousemove="preview(this)" /></li>
 								</ul>
 							</div>
 							<a class="next">&gt;</a>
@@ -146,14 +139,14 @@
 				</div>
 				<div class="fr itemInfo-wrap">
 					<div class="sku-name">
-						<h4>Apple iPhone 6s（A1700）64G玫瑰金色 移动通信电信4G手机</h4>
+						<h4>{{sku.title}}</h4>
 					</div>
 					<div class="news"><span th:utext="${spu.subTitle}">推荐选择下方[移动优惠购],手机套餐齐搞定,不用换号,每月还有花费返</span></div>
 					<div class="summary">
 						<div class="summary-wrap">
 							<div class="fl title"><i>价　　格</i></div>
 							<div class="fl price">
-								<i>¥</i><em>5299.00</em><span>降价通知</span>
+								<i>¥</i><em>{{ly.formatPrice(sku.price)}}</em><span>降价通知</span>
 							</div>
 							<div class="fr remark"><i>累计评价</i><em>612188</em></div>
 						</div>
@@ -639,15 +632,27 @@
 	const paramMap = /*[[${paramMap}]]*/ {};
 	const indexes = {};
 	Object.keys(paramMap).forEach(param => indexes[param] = 0);
+
+	const skus = /*[[${skus}]]*/ [];
 </script>
 <script>
     var itemVm = new Vue({
         el:"#itemApp",
         data:{
+        	ly,
 			specialSpec,
 			paramMap,
 			indexes
         },
+		computed: {
+        	sku(){
+        		const index = Object.values(this.indexes).join("_");		//获取index值（0_0_0这种形式）
+        		return skus.find(sku => sku.indexes == index);		//根据index值在skus中查询，返回sku
+			},
+			images(){
+        		return this.sku.images ? this.sku.images.split(",") : "";
+			}
+		},
         components:{
             lyTop: () => import('/js/pages/top.js')
         }
