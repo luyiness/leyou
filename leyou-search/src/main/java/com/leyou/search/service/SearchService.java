@@ -4,19 +4,25 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.pojo.*;
+import com.leyou.pojo.Goods;
 import com.leyou.search.client.BrandClient;
 import com.leyou.search.client.CategoryClient;
 import com.leyou.search.client.GoodsClient;
 import com.leyou.search.client.SpecificationClient;
 import com.leyou.search.pojo.SearchRequest;
+import com.leyou.search.pojo.SearchResult;
 import com.leyou.search.repository.GoodsRepository;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -48,7 +54,7 @@ public class SearchService {
     @Autowired
     private GoodsRepository goodsRepository;
 
-    public PageResult<com.leyou.pojo.Goods> search(SearchRequest request) {
+    public SearchResult search(SearchRequest request) {
         String key = request.getKey();
         // 判断是否有搜索条件，如果没有，直接返回null。
         if (StringUtils.isBlank(key)) {
@@ -71,11 +77,68 @@ public class SearchService {
         int size = request.getSize();
         queryBuilder.withPageable(PageRequest.of(page - 1, size));
 
+        String categoryAggName = "categories";
+        String brandAggName = "brands";
+        queryBuilder.addAggregation(AggregationBuilders.terms(categoryAggName).field("cid3"));  //根据cid3聚合category（如图一）
+        queryBuilder.addAggregation(AggregationBuilders.terms(brandAggName).field("brandId"));  //根据brandId聚合brand（同理）
+
         // 4、查询，获取结果
-        Page<com.leyou.pojo.Goods> goodsPage = this.goodsRepository.search(queryBuilder.build());
+        AggregatedPage<Goods> goodsPage = (AggregatedPage<Goods>)this.goodsRepository.search(queryBuilder.build());
+
+            //获取聚合的结果集
+        List<Map<String, Object>> categories = getCategoryAggResult(goodsPage.getAggregation(categoryAggName));
+        List<Brand> brands = getBrandAggResult(goodsPage.getAggregation(brandAggName));
+
 
         // 封装结果并返回
-        return new PageResult<>(goodsPage.getTotalElements(), goodsPage.getTotalPages(), goodsPage.getContent());
+        return new SearchResult(goodsPage.getTotalElements(), goodsPage.getTotalPages(), goodsPage.getContent(), categories, brands);
+    }
+
+    /**
+     * 解析brand的聚合结果集
+     * @param aggregation
+     * @return
+     */
+    private List<Brand> getBrandAggResult(Aggregation aggregation) {
+        // 处理聚合结果集
+        LongTerms terms = (LongTerms)aggregation;
+        // 获取所有的品牌id桶
+        List<LongTerms.Bucket> buckets = terms.getBuckets();
+        // 定义一个品牌集合，搜集所有的品牌对象
+        List<Brand> brands = new ArrayList<>();
+        // 解析所有的id桶，查询品牌
+        buckets.forEach(bucket -> {     //遍历桶bucket
+            Brand brand = this.brandClient.queryBrandById(bucket.getKeyAsNumber().longValue()); //获取key值，根据key值将桶中的查询brand（如图一）
+            brands.add(brand);      //再将查到的封装成集合
+        });
+        return brands;
+    }
+
+    /**
+     * 解析category的聚合结果集
+     * @param aggregation
+     * @return
+     */
+    private List<Map<String, Object>> getCategoryAggResult(Aggregation aggregation) {
+        // 处理聚合结果集
+        LongTerms terms = (LongTerms)aggregation;
+        // 获取所有的分类id桶
+        List<LongTerms.Bucket> buckets = terms.getBuckets();
+        // 定义一个品牌集合，搜集所有的品牌对象
+        List<Map<String, Object>> categories = new ArrayList<>();
+        List<Long> cids = new ArrayList<>();
+        // 解析所有的id桶，查询品牌
+        buckets.forEach(bucket -> {
+            cids.add(bucket.getKeyAsNumber().longValue());
+        });
+        List<String> names = this.categoryClient.queryNamesByIds(cids);
+        for (int i = 0; i < cids.size(); i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", cids.get(i));
+            map.put("name", names.get(i));
+            categories.add(map);
+        }
+        return categories;
     }
 
 
