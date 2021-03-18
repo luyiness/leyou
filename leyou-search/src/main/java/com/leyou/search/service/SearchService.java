@@ -14,10 +14,7 @@ import com.leyou.search.pojo.SearchResult;
 import com.leyou.search.repository.GoodsRepository;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
@@ -68,7 +65,7 @@ public class SearchService {
         // 构建查询条件
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 
-        //MatchQueryBuilder basicQuery = QueryBuilders.matchQuery("all", key).operator(Operator.AND);
+        //QueryBuilder basicQuery = QueryBuilders.matchQuery("all", key).operator(Operator.AND);
 
         BoolQueryBuilder basicQuery = buildBoolQueryBuilder(request);
 
@@ -147,7 +144,7 @@ public class SearchService {
      * @param basicQuery
      * @return
      */
-    private List<Map<String, Object>> getParamAggResult(Long id, MatchQueryBuilder basicQuery) {
+    private List<Map<String, Object>> getParamAggResult(Long id, QueryBuilder basicQuery) {
 
         // 创建自定义查询构建器
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
