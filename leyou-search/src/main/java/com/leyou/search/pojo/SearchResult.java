@@ -16,7 +16,29 @@ public class SearchResult extends PageResult<com.leyou.pojo.Goods> {
 
     private List<Brand> brands;
 
+    private List<Map<String, Object>> specs;
+
     public SearchResult() {
+    }
+
+    public SearchResult(List<Map<String, Object>> categories, List<Brand> brands, List<Map<String, Object>> specs) {
+        this.categories = categories;
+        this.brands = brands;
+        this.specs = specs;
+    }
+
+    public SearchResult(Long total, List<Goods> items, List<Map<String, Object>> categories, List<Brand> brands, List<Map<String, Object>> specs) {
+        super(total, items);
+        this.categories = categories;
+        this.brands = brands;
+        this.specs = specs;
+    }
+
+    public SearchResult(Long total, Integer totalPage, List<Goods> items, List<Map<String, Object>> categories, List<Brand> brands, List<Map<String, Object>> specs) {
+        super(total, totalPage, items);
+        this.categories = categories;
+        this.brands = brands;
+        this.specs = specs;
     }
 
     public SearchResult(List<Map<String, Object>> categories, List<Brand> brands) {
