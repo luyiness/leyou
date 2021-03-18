@@ -170,4 +170,8 @@ public class GoodsService {
         return new PageResult<>(pageInfo.getTotal(), spuBos);
 
     }
+
+    public Spu querySpuById(Long id) {
+        return this.spuMapper.selectByPrimaryKey(id);
+    }
 }
