@@ -329,4 +329,9 @@ public class SearchService {
         return result;
     }
 
+    public void save(Long id) throws IOException {
+        Spu spu = this.goodsClient.querySpuById(id);
+        Goods goods = this.buildGoods(spu);
+        this.goodsRepository.save(goods);
+    }
 }

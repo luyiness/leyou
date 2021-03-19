@@ -13,6 +13,11 @@
     <artifactId>leyou-item-service</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
         <!-- web启动器 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
