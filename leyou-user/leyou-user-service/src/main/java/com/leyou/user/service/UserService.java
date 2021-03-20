@@ -89,4 +89,22 @@ public class UserService {
         user.setCreated(new Date());
         this.userMapper.insertSelective(user);  //保存到数据库
     }
+
+    public User queryUser(String username, String password) {
+        // 查询
+        User record = new User();
+        record.setUsername(username);
+        User user = this.userMapper.selectOne(record);
+
+        if (user == null) {     //校验用户名
+            return null;
+        }
+
+        String verifyPassword = CodecUtils.md5Hex(password, user.getSalt());    //将请求的密码加盐加密
+        if (user.getPassword().equals(verifyPassword)) { //校验密码；user.getPassword()是真正的密码
+            return user;    //用户名密码都正确,返回
+        }
+
+        return null;
+    }
 }
