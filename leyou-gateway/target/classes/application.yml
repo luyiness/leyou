@@ -17,3 +17,16 @@ zuul:
     auth-service: /auth/**
   add-host-header: true
   sensitive-headers:  #用" "覆盖敏感头信息
+
+leyou:
+  jwt:
+    pubKeyPath: /Users/luyi/IdeaProjects/leyou/rsa/rsa.pri   #公钥地址
+    cookieName: leyou-token
+  filter:
+    allowPaths:
+      - /api/auth
+      - /api/search
+      - /api/user/register
+      - /api/user/check
+      - /api/user/code
+      - /api/item
