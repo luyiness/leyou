@@ -15,3 +15,5 @@ zuul:
     search-service: /search/**
     user-service: /user/**
     auth-service: /auth/**
+  add-host-header: true
+  sensitive-headers:  #用" "覆盖敏感头信息
