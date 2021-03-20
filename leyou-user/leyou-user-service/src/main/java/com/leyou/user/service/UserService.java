@@ -1,5 +1,6 @@
 package com.leyou.user.service;
 
+import com.leyou.common.utils.CodecUtils;
 import com.leyou.common.utils.NumberUtils;
 import com.leyou.user.mapper.UserMapper;
 import com.leyou.user.pojo.User;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -65,5 +67,26 @@ public class UserService {
 
         //3、将验证码保存到redis中
         this.redisTemplate.opsForValue().set(KEY_PREFIX + phone, code,1, TimeUnit.MINUTES);
+    }
+
+    public void register(User user, String code) {
+        //1、校验验证码
+        String redisCode = this.redisTemplate.opsForValue().get(KEY_PREFIX + user.getPhone());  //先从redis中获取验证码
+
+        if (StringUtils.equals(code, redisCode)){
+            return;
+        }
+
+        //2、生成salt
+        String salt = CodecUtils.generateSalt();
+        user.setSalt(salt);
+
+        //3、对密码 加salt、加密
+        user.setPassword(CodecUtils.md5Hex(user.getPassword(), salt));      //使用md5加密加盐
+
+        //4、新增用户
+        user.setId(null);
+        user.setCreated(new Date());
+        this.userMapper.insertSelective(user);  //保存到数据库
     }
 }
