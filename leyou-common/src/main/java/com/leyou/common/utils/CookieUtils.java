@@ -105,7 +105,7 @@ public final class CookieUtils {
 	 * @param response 响应
 	 * @param cookieName name
 	 * @param cookieValue value
-	 * @param cookieMaxAge 生存时间
+	 * @param cookieMaxAge 生存时间(秒)
 	 */
 	public static final void setCookie(HttpServletRequest request, HttpServletResponse response, String cookieName, String cookieValue, Integer cookieMaxAge) {
 		setCookie(request,response,cookieName,cookieValue,cookieMaxAge,null, null);
