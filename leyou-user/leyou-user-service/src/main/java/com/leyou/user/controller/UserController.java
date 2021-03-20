@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
+
 /**
  * @Date:2021/03_2:52 下午
  * @Description：
@@ -39,7 +41,7 @@ public class UserController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<Void> register(User user,@RequestParam("code")String code){
+    public ResponseEntity<Void> register(@Valid User user, @RequestParam("code")String code){
         this.userService.register(user,code);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

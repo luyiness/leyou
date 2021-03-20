@@ -1,6 +1,7 @@
 package com.leyou.user.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,6 +19,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Length(min = 4, max = 30 ,message = "用户名必须在4-30位之间")
     private String username;// 用户名
 
     @JsonIgnore     //@JsonIgnore注解：对象序列化为字符串时、忽略该属性
